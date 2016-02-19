@@ -1,16 +1,15 @@
 #!/usr/bin/env groovy
-
 import com.google.common.collect.EvictingQueue
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringSerializer
 
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 
 @Grab(group = 'com.google.guava', module = 'guava', version = '19.0')
-@Grab(group = 'org.apache.kafka', module = 'kafka_2.10', version = '0.8.2.1')
+@Grab(group = 'org.apache.kafka', module = 'kafka-clients', version = '0.8.2.2')
+@Grab(group = 'ch.qos.logback', module = 'logback-classic', version = '1.1.5')
 class C {
   static def r = new Random()
   static def xMax = 100
@@ -73,10 +72,9 @@ class Walker {
     }
     try {
       if (lock.tryLock(5, TimeUnit.SECONDS)) {
-        def i = 0
-        while (i < 10 || !p.isValid() || previous.find { it.isCloseTo(p) }) {
-          // avoid previous places
-          i++ // security in case we get cornered
+        def count = 0
+        while (count < 10 && (!p.isValid() || previous.find { it.isCloseTo(p) })) {
+          count++ // security in case we get cornered
           p = current.move(Direction.random())
         }
         previous.add(current)
@@ -96,18 +94,18 @@ def walkers = []
 println "Starting walkers, press Ctrl+C to stop."
 
 def props = new Properties();
-props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "broker-0.kafka.mesos:1025");
-props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, System.env.PRODUCER_HOSTS ?: "192.168.99.100:9092");
+props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, 'org.apache.kafka.common.serialization.StringSerializer');
+props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, 'org.apache.kafka.common.serialization.StringSerializer');
 def producer = new KafkaProducer<String, String>(props);
 try {
   while (true) {
+    println "move walker(s) ..."
     walkers.each { Walker w ->
       w.move()
       def record = new ProducerRecord<String, String>("walker", w.uid.toString(),
-          """{"uid":"$w.uid", "x":$w.current.x, "y":$w.current.y}""");
-      def meta = producer.send(record).get()
-      println meta
+          """{"uid":"$w.uid", "x":$w.current.x, "y":$w.current.y}""" as String);
+      producer.send(record).get()
     }
     Thread.sleep(1000)
   }
