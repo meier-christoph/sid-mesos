@@ -56,16 +56,16 @@ class EventPoller implements Runnable {
 
 class EventStreamer {
 
+  def f = 1000
   Writer writer
-  def count = 0
+  def t = System.currentTimeMillis() + f
 
   @Subscribe
   void onMessage(String e) {
     writer.println("""event: data\ndata: $e\n""");
     writer.flush();
-    count++
-    if (count > 10) {
-      count = 0
+    if (t < System.currentTimeMillis()) {
+      t = System.currentTimeMillis() + f
       writer.println("""event: render\ndata: render\n""");
       writer.flush();
       println "render ..."

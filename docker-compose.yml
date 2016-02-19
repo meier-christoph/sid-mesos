@@ -1,0 +1,20 @@
+kafka:
+  image: spotify/kafka:latest
+  ports:
+    - "2181:2181"
+    - "9092:9092"
+  environment:
+    ADVERTISED_HOST: 192.168.99.100
+    ADVERTISED_PORT: 9092
+
+producer:
+  image: meierc/sid-mesos-kafka-producer:latest
+  environment:
+    PRODUCER_HOSTS: 192.168.99.100:9092
+
+consumer:
+  image: meierc/sid-mesos-kafka-consumer:latest
+  ports:
+    - "8080:8080"
+  environment:
+    CONSUMER_HOSTS: 192.168.99.100:2181
