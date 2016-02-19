@@ -1,8 +1,6 @@
 #!/usr/bin/env groovy
 import com.google.common.collect.EvictingQueue
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.*
 
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
@@ -91,24 +89,41 @@ class Walker {
 def walkers = []
 (1..10).collect(walkers) { new Walker() }
 
-println "Starting walkers, press Ctrl+C to stop."
+class ShutdownCallback implements Callback {
 
-def props = new Properties();
-props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, System.env.PRODUCER_HOSTS ?: "192.168.99.100:9092");
-props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, 'org.apache.kafka.common.serialization.StringSerializer');
-props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, 'org.apache.kafka.common.serialization.StringSerializer');
-def producer = new KafkaProducer<String, String>(props);
+  @Override
+  void onCompletion(final RecordMetadata metadata, final Exception exception) {
+    if (exception) {
+      println "Fatal Error: $exception"
+      exception.printStackTrace()
+      System.exit(-1)
+    }
+  }
+}
+
+println "Starting walkers, press Ctrl+C to stop."
+def producer
 try {
+  def callback = new ShutdownCallback()
+  def props = new Properties()
+  props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, System.env.PRODUCER_HOSTS ?: "192.168.99.100:9092")
+  props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, 'org.apache.kafka.common.serialization.StringSerializer')
+  props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, 'org.apache.kafka.common.serialization.StringSerializer')
+  producer = new KafkaProducer<String, String>(props)
   while (true) {
     println "move walker(s) ..."
     walkers.each { Walker w ->
       w.move()
       def record = new ProducerRecord<String, String>("walker", w.uid.toString(),
-          """{"uid":"$w.uid", "x":$w.current.x, "y":$w.current.y}""" as String);
-      producer.send(record).get()
+          """{"uid":"$w.uid", "x":$w.current.x, "y":$w.current.y}""" as String)
+      producer.send(record, callback).get(10, TimeUnit.SECONDS)
     }
     Thread.sleep(1000)
   }
+} catch (Exception e) {
+  println "Fatal Error: $e"
+  e.printStackTrace()
+  System.exit(-1)
 } finally {
-  producer.close()
+  if (producer) producer.close()
 }
