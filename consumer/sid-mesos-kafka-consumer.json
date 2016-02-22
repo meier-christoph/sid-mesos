@@ -1,0 +1,34 @@
+{
+  "id": "sid-mesos-kafka-consumer",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "meierc/sid-mesos-kafka-consumer:latest",
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 0,
+          "servicePort": 0,
+          "protocol": "tcp"
+        }
+      ],
+      "forcePullImage": true
+    }
+  },
+  "env": {
+    "CONSUMER_HOSTS": "master.mesos:2181"
+  },
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "portIndex": 0
+    }
+  ],
+  "acceptedResourceRoles": [
+    "slave_public"
+  ],
+  "instances": 1,
+  "cpus": 0.1,
+  "mem": 1024
+}

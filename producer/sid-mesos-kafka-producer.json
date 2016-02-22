@@ -1,0 +1,16 @@
+{
+  "id": "sid-mesos-kafka-producer",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "meierc/sid-mesos-kafka-producer:latest",
+      "forcePullImage": true
+    }
+  },
+  "env": {
+    "PRODUCER_HOSTS": "broker-0.kafka.mesos:1025,broker-1.kafka.mesos:1025,broker-2.kafka.mesos:1025"
+  },
+  "instances": 1,
+  "cpus": 0.1,
+  "mem": 512
+}
