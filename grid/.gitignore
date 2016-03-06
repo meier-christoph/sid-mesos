@@ -1,0 +1,7 @@
+node_modules
+test-results
+/build
+*.log*
+.DS_Store
+.idea
+*.iml

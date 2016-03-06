@@ -1,0 +1,50 @@
+[ignore]
+.*/build/.*
+.*/react/.*
+.*/node_modules/babel-helper-remap-async-to-generator/lib/.*
+.*/node_modules/babel-helper-builder-binary-assignment-operator-visitor/lib/.*
+.*/node_modules/babel-helper-explode-assignable-expression/lib/.*
+.*/node_modules/fbjs/*
+.*/node_modules/airflux/es6/*
+.*/backup/.*
+
+[include]
+./src
+./test
+
+[libs]
+./flow
+
+[options]
+strip_root=true
+munge_underscores=true
+
+
+unsafe.enable_getters_and_setters=true
+esproposal.decorators=ignore
+esproposal.class_static_fields=ignore
+esproposal.class_instance_fields=ignore
+
+suppress_comment= \\(.\\|\n\\)*\\$IgnoreFlow
+suppress_comment= \\(.\\|\n\\)*\\$FlowPrototypeDecl
+suppress_comment= \\(.\\|\n\\)*\\$FlowComputedProperty
+suppress_comment= \\(.\\|\n\\)*\\$FlowAnnotation
+suppress_comment= \\(.\\|\n\\)*\\$ScssImport
+suppress_comment= \\(.\\|\n\\)*\\$Airflux
+
+
+module.name_mapper='.*\(.scss\)' -> 'CssModule'
+module.name_mapper='^api/\(.*\)$' -> '<PROJECT_ROOT>/src/api/\1'
+module.name_mapper='^app/\(.*\)$' -> '<PROJECT_ROOT>/src/app/\1'
+module.name_mapper='^dohrm-react/\(.*\)$' -> '<PROJECT_ROOT>/src/dohrm-react/\1'
+module.name_mapper='^auth/\(.*\)$' -> '<PROJECT_ROOT>/src/auth/\1'
+module.name_mapper='^components/\(.*\)$' -> '<PROJECT_ROOT>/src/components/\1'
+module.name_mapper='^material/\(.*\)$' -> '<PROJECT_ROOT>/src/material/\1'
+module.name_mapper='^i18n/\(.*\)$' -> '<PROJECT_ROOT>/src/i18n/\1'
+module.name_mapper='^stores/\(.*\)$' -> '<PROJECT_ROOT>/src/stores/\1'
+module.name_mapper='^utils/\(.*\)$' -> '<PROJECT_ROOT>/src/utils/\1'
+module.system=haste
+
+
+[version]
+0.21.0
