@@ -1,4 +1,5 @@
 kafka:
+  container_name: kafka
   image: spotify/kafka:latest
   ports:
     - "2181:2181"
@@ -7,12 +8,20 @@ kafka:
     ADVERTISED_HOST: 192.168.99.100
     ADVERTISED_PORT: 9092
 
+cassandra:
+  container_name: cassandra
+  image: cassandra:latest
+  ports:
+    - "9042:9042"
+
 producer:
+  container_name: producer
   image: meierc/sid-mesos-kafka-producer:latest
   environment:
     PRODUCER_HOSTS: 192.168.99.100:9092
 
 consumer:
+  container_name: consumer
   image: meierc/sid-mesos-kafka-consumer:latest
   ports:
     - "8080:8080"

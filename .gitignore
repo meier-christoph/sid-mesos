@@ -1,2 +1,8 @@
 ### IDEA
 .idea/
+
+### SBT
+target/
+
+### Spark
+spark/checkpoint/
