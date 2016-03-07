@@ -1,0 +1,34 @@
+{
+  "id": "sid-mesos-cassandra-grid",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "meierc/sid-mesos-cassandra-grid:latest",
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 0,
+          "servicePort": 0,
+          "protocol": "tcp"
+        }
+      ],
+      "forcePullImage": true
+    }
+  },
+  "env": {
+    "CASSANDRA_HOST": "cassandra-dcos-node.cassandra.dcos.mesos"
+  },
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "portIndex": 0
+    }
+  ],
+  "acceptedResourceRoles": [
+    "slave_public"
+  ],
+  "instances": 1,
+  "cpus": 0.1,
+  "mem": 1024
+}

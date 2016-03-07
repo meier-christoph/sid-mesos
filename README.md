@@ -3,6 +3,7 @@
 ## Getting Started
 
 Note: when testing locally with Docker make sure that you add the following entries into your /etc/hosts file.
+
 ```
 192.168.99.100 master.mesos
 192.168.99.100 cassandra-dcos-node.cassandra.dcos.mesos
@@ -17,6 +18,7 @@ Note: when testing locally with Docker make sure that you add the following entr
     Note: this demo requires at least 3 slaves.
 
 - Install DCOS
+
 ```
 mkdir -p dcos && cd dcos && \
   curl -O https://downloads.mesosphere.io/dcos-cli/install.sh && \
@@ -25,6 +27,7 @@ mkdir -p dcos && cd dcos && \
 ```
 
 - Add community packages
+
 ```
   dcos config prepend package.sources https://github.com/mesosphere/multiverse/archive/version-1.x.zip
   dcos config prepend package.sources https://github.com/data-fellas/multiverse/archive/spark-notebook.zip
@@ -32,26 +35,31 @@ mkdir -p dcos && cd dcos && \
 ```
 
 - Install Chronos (scheduler)
+
 ```
   dcos package install chronos
 ```
 
 - Install Spark (map/reduce)
+
 ```
   dcos package install spark
 ```
 
-- Install Kafka   
+- Install Kafka 
+  
 ```
   dcos package install kafka
 ```
 
 - Install Cassandra (db)
+
 ```
   dcos package install cassandra
 ```
 
 - Install Spark Notebook
+
 ```
   dcos package install --app spark-notebook --package-version=0.0.2
 ```
@@ -59,6 +67,7 @@ mkdir -p dcos && cd dcos && \
 ## Configuration
 
 - Start 3 Kafka brokers on the cluster
+
 ```
   dcos kafka broker add 0..2
   dcos kafka broker update 0..2 --options num.io.threads=16,num.partitions=6,default.replication.factor=2
@@ -66,6 +75,7 @@ mkdir -p dcos && cd dcos && \
 ```
 
 - Create Cassandra table/keyspace
+
 ```
   dcos node ssh --master-proxy --master
 
@@ -79,25 +89,28 @@ mkdir -p dcos && cd dcos && \
   nb int,
   PRIMARY KEY (coord,ts)
   ) WITH CLUSTERING ORDER BY (ts DESC);
-
 ```
 
 - Start Producer
+
 ```
   dcos marathon app add producer/sid-mesos-kafka-producer.json
 ```
 
 - Start Consumer
+
 ```
   dcos marathon app add consumer/sid-mesos-kafka-consumer.json      
 ```
 
 - Start Spark Driver
+
 ```
   dcos spark run --submit-args='--class WalkerApp https://s3.eu-central-1.amazonaws.com/sid-mesos-spark-apps/spark-walker-app-assembly-1.0.jar'
 ```
 
 - Start Grid
+
 ```
-  dcos marathon app add TODO
+  dcos marathon app add grid/sid-mesos-cassandra-grid.json
 ```
