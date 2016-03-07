@@ -6,6 +6,6 @@ RUN grape install com.google.guava guava 19.0 && \
     grape install org.eclipse.jetty.aggregate jetty-all 7.6.19.v20160209 && \
     grape install com.datastax.cassandra cassandra-driver-core 3.0.0
 
-ADD index.html webservices.groovy /source/
+ADD webservices.groovy /source/
 
 ENTRYPOINT ["groovy", "-Dgrape.root=/graperoot", "webservices.groovy"]

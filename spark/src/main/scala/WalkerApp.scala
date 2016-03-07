@@ -1,32 +1,46 @@
+
+import com.datastax.spark.connector._
+import com.datastax.spark.connector.streaming._
+import com.datastax.spark.connector.writer._
 import org.apache.spark.SparkConf
+import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
-import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
 
 object WalkerApp {
+  implicit val formats = DefaultFormats
+
   def main(args: Array[String]) {
     val conf = new SparkConf().setAppName("Walker Spark Application")
-        .setMaster("local")
+        .set("spark.cassandra.connection.host", "cassandra-dcos-node.cassandra.dcos.mesos")
+        .set("spark.cassandra.connection.port", "9042")
+        .setMaster("local[*]")
 
     val ssc = new StreamingContext(conf, Seconds(1))
     ssc.checkpoint("checkpoint")
 
-    //    val kafkaConf = Map(
-    //      "zookeeper.connect" -> "192.168.99.100:2181",
-    //      "group.id" -> "walker",
-    //      "zookeeper.session.timeout.ms" -> "400",
-    //      "zookeeper.sync.time.ms" -> "200",
-    //      "auto.commit.interval.ms" -> "1000"
-    //    )
+    val topics = Map("walker" -> 1) // thread per topic
+    val streams = KafkaUtils.createStream(ssc, "master.mesos:2181", "spark-walker", topics).map(_._2)
+    val results = streams
+        .map(parse(_).extract[Data]) // parse json
+        .map(it => (it.toGrid, 1)) // create tuple e.g. (A1, 1)
+        .reduceByKeyAndWindow(_ + _, _ - _, Seconds(10), Seconds(2)) // sum tuples by key e.g. (A1, 5)
+        .map(t => (t._1, System.currentTimeMillis(), t._2)) // add timestamp
 
-    val topics = Map("walker" -> 1)
-    val streams = KafkaUtils.createStream(ssc, "192.168.99.100:2181", "spark-walker", topics).map(_._2)
-    val messages = streams // .map(m => Map("uid" -> "abc", "x" -> 10, "y" -> 20))
-    streams.print()
-
-    //    val wordCounts = words.map(x => (x, 1L))
-    //        .reduceByKeyAndWindow(_ + _, _ - _, Seconds(10), Seconds(2), 2)
+    // FIXME: https://datastax-oss.atlassian.net/browse/SPARKC-339
+    results.saveToCassandra("walker", "grid",
+      SomeColumns("coord" as "_1", "ts" as "_2", "nb" as "_3"), // map tuple to columns
+      WriteConf(ttl = TTLOption.constant(60))) // ttl 60 sec
 
     ssc.start()
     ssc.awaitTermination()
   }
+
+  class Data(uid: String, x: Int, y: Int) {
+    def toGrid: String = {
+      s"${('A'.toInt + x / 10).toChar}${1 + y / 10}"
+    }
+  }
+
 }
