@@ -28,5 +28,10 @@ INSERT INTO grid(coord,ts,nb) VALUES ('A2',toTimestamp(now()),2) USING TTL 20;
 INSERT INTO grid(coord,ts,nb) VALUES ('B1',toTimestamp(now()),7) USING TTL 20;
 INSERT INTO grid(coord,ts,nb) VALUES ('C1',toTimestamp(now()),18) USING TTL 20;
 
+INSERT INTO grid(coord,ts,nb) VALUES ('A1',dateOf(now()),15) USING TTL 20;
+INSERT INTO grid(coord,ts,nb) VALUES ('A2',dateOf(now()),2) USING TTL 20;
+INSERT INTO grid(coord,ts,nb) VALUES ('B1',dateOf(now()),7) USING TTL 20;
+INSERT INTO grid(coord,ts,nb) VALUES ('C1',dateOf(now()),18) USING TTL 20;
+
 SELECT * from grid;
 ```

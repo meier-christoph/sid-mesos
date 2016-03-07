@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+  <script src="//code.jquery.com/jquery-2.2.1.min.js" charset="utf-8"></script>
+</head>
+<body>
+<div id="graph"></div>
+<script>
+  var width = 500;
+  var height = 500;
+  var vx = width / 10;
+  var vy = height / 10;
+  var margin = {top: 10, right: 10, bottom: 10, left: 10};
+
+  var svg = d3.select("#graph")
+      .append("svg").attr("width", width).attr("height", height);
+
+  function renderRect(d, total) {
+    svg.append("rect")
+        .attr("x", d.x * vx)
+        .attr("y", vy * d.y)
+        .attr("height", vy)
+        .attr("width", vx)
+        .attr("fill", "blue")
+        .attr("stroke", "black")
+        .attr("stroke-width", 1)
+        .attr("fill-opacity", d.nb / total);
+  }
+
+  function renderGrid() {
+    $.getJSON("data", function (data) {
+      var total = 0;
+      data.results.forEach(function (it) {
+        total += it.nb;
+      });
+
+      svg.selectAll("*").remove();
+      for (var i = 0; i < 10; i++) {
+        for (var j = 0; j < 10; j++) {
+          renderRect({x: i, y: j, nb: 0}, 1);
+        }
+      }
+
+      data.results.map(function (d) {
+        renderRect(d, total);
+      });
+    });
+  }
+
+  setInterval(function () {
+    renderGrid();
+  }, 1000);
+</script>
+</body>
+</html>
