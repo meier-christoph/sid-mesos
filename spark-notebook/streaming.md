@@ -11,6 +11,8 @@
     "codemirror_mode": "text/x-scala"
   },
   "trusted": true,
+  
+  
   "customLocalRepo": "/tmp/repo",
   "customRepos": null,
   "customDeps": [
@@ -24,6 +26,8 @@
   "customSparkConf": {
     "spark.cassandra.connection.host": "cassandra-dcos-node.cassandra.dcos.mesos"
   },
+  
+  
   "kernelspec": {
     "name": "spark",
     "display_name": "Scala [2.10.4] Spark [1.5.0] Hadoop [2.5.0-cdh5.3.3]  {Hive ✓}  {Parquet ✓}"

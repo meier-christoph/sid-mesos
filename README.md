@@ -15,7 +15,7 @@ Note: when testing locally with Docker make sure that you add the following entr
 - Install Mesosphere on AWS
   (https://mesosphere.com/amazon/)
 
-    Note: this demo requires at least 3 slaves.
+    Note: this demo requires at least 3 slaves (5 with spark streaming).
 
 - Install DCOS
 
@@ -46,8 +46,8 @@ mkdir -p dcos && cd dcos && \
   dcos package install spark
 ```
 
-- Install Kafka 
-  
+- Install Kafka
+
 ```
   dcos package install kafka
 ```
@@ -62,6 +62,14 @@ mkdir -p dcos && cd dcos && \
 
 ```
   dcos package install --app spark-notebook --package-version=0.0.2
+```
+
+- Install HDFS
+  Note: hdfs requires at least 5 slaves and spark streaming uses hdfs to store
+  intermediary results.
+
+```
+  dcos package install hdfs
 ```
 
 ## Configuration
@@ -100,7 +108,7 @@ mkdir -p dcos && cd dcos && \
 - Start Consumer
 
 ```
-  dcos marathon app add consumer/sid-mesos-kafka-consumer.json      
+  dcos marathon app add consumer/sid-mesos-kafka-consumer.json
 ```
 
 - Start Spark Driver
